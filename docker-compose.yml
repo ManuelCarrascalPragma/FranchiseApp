@@ -1,0 +1,15 @@
+services:
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: franchise-postgres
+    environment:
+      POSTGRES_DB: franchise_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
