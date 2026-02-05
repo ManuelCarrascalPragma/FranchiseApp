@@ -1,14 +1,32 @@
-##Spring Configuration
 server:
   port: 8080
+
 spring:
   application:
     name: FranchiseApp
-  devtools:
-    add-properties: false
   h2:
     console:
-      enabled: true
-      path: /h2
-  profiles:
-    include:
+      enabled: false
+  r2dbc:
+    initialization-mode: never
+
+  sql:
+    init:
+      mode: always
+      platform: postgres
+      schema-locations: classpath:schema.sql
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+adapters:
+  r2dbc:
+    host: localhost
+    port: 5433
+    database: franchise_db
+    schema: public
+    username: user
+    password: password
