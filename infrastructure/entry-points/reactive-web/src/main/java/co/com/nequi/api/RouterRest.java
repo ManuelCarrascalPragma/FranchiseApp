@@ -2,6 +2,8 @@ package co.com.nequi.api;
 
 import co.com.nequi.model.franchise.Franchise;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
+import static org.springframework.web.reactive.function.server.RequestPredicates.PATCH;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
@@ -42,9 +45,29 @@ public class RouterRest {
                                     content = @Content(schema = @Schema(implementation = Franchise.class))
                             )
                     )
+            ),
+            @RouterOperation(
+                    path = "/api/franchises/{id}",
+                    produces = {MediaType.APPLICATION_JSON_VALUE},
+                    method = RequestMethod.PATCH,
+                    beanClass = FranchiseHandler.class,
+                    beanMethod = "updateFranchise",
+                    operation = @Operation(
+                            operationId = "updateFranchise",
+                            responses = {
+                                    @ApiResponse(responseCode = "200", description = "Actualización exitosa"),
+                                    @ApiResponse(responseCode = "404", description = "Franquicia no encontrada"),
+                                    @ApiResponse(responseCode = "400", description = "Error en datos")
+                            },
+                            parameters = @Parameter(name = "id", in = ParameterIn.PATH, required = true),
+                            requestBody = @RequestBody(content = @Content(schema = @Schema(implementation = Franchise.class)))
+                    )
             )
     })
     public RouterFunction<ServerResponse> routerFunction(FranchiseHandler handler) {
-        return route(POST("/api/franchises"), handler::createFranchise);
+        return route(POST("/api/franchises"), handler::createFranchise)
+                .andRoute(PATCH("/api/franchises/{id}"), handler::updateFranchise);
     }
+
+
 }

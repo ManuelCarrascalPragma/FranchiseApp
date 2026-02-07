@@ -2,6 +2,8 @@ package co.com.nequi.api.handler;
 
 import co.com.nequi.api.models.ErrorResponse;
 import co.com.nequi.model.exceptions.BusinessException;
+import co.com.nequi.model.exceptions.ResourceNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.boot.webflux.autoconfigure.error.AbstractErrorWebExceptionHandler;
 import org.springframework.boot.webflux.error.ErrorAttributes;
@@ -17,6 +19,7 @@ import reactor.core.publisher.Mono;
 
 @Component
 @Order(-2)
+@Slf4j
 public class GlobalErrorHandler extends AbstractErrorWebExceptionHandler {
 
     public GlobalErrorHandler(ErrorAttributes errorAttributes, WebProperties webProperties,
@@ -39,10 +42,13 @@ public class GlobalErrorHandler extends AbstractErrorWebExceptionHandler {
         if (error instanceof BusinessException) {
             status = HttpStatus.BAD_REQUEST;
             message = error.getMessage();
-        } else {
+        } else if (error instanceof ResourceNotFoundException){
+         status = HttpStatus.NOT_FOUND;
+         message = error.getMessage();
+        }else {
             status = HttpStatus.INTERNAL_SERVER_ERROR;
             message = "Ocurrió un error inesperado en el sistema";
-            error.printStackTrace();
+            log.error("Error inesperado en el sistema", error);
         }
 
         return ServerResponse.status(status)
