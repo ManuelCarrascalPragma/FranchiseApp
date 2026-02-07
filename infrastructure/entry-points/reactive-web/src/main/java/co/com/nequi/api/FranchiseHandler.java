@@ -25,4 +25,14 @@ public class FranchiseHandler {
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(franchise));
     }
+
+    public Mono<ServerResponse> updateFranchise(ServerRequest request) {
+        Long id = Long.valueOf(request.pathVariable("id"));
+
+        return request.bodyToMono(Franchise.class)
+                .flatMap(franchise -> franchiseUseCase.updateFranchise(id, franchise))
+                .flatMap(updatedFranchise -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(updatedFranchise));
+    }
 }

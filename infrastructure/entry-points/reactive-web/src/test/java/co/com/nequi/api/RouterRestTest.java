@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -47,5 +48,26 @@ class RouterRestTest {
                 .expectStatus().isCreated()
                 .expectBody(Franchise.class)
                 .isEqualTo(franchise);
+    }
+
+    @Test
+    void testUpdateFranchise() {
+        Franchise updatedFranchise = new Franchise(1L, "Nombre Nuevo");
+
+        Mockito.when(franchiseUseCase.updateFranchise(Mockito.eq(1L), Mockito.any(Franchise.class)))
+                .thenReturn(Mono.just(updatedFranchise));
+
+        webTestClient.patch()
+                .uri("/api/franchises/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedFranchise)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Franchise.class)
+                .consumeWith(response -> {
+                    Franchise f = response.getResponseBody();
+                    assert f != null;
+                    assert f.getName().equals("Nombre Nuevo");
+                });
     }
 }

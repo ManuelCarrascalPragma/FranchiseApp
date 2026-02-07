@@ -19,4 +19,6 @@ public class FranchiseRepositoryAdapter extends ReactiveAdapterOperations<Franch
         return repository.findByName(name)
                 .map(this::toEntity);
     }
+
+
 }
