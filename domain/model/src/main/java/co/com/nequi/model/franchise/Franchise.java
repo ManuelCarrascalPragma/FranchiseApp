@@ -1,16 +1,15 @@
 package co.com.nequi.model.franchise;
 
-import co.com.nequi.model.branch.Branch;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Value;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.util.List;
-
-@Value
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder(toBuilder = true)
 public class Franchise {
-    Long id;
-    String name;
-    List<Branch> branches;
-
+    private Long id;
+    private String name;
 }
