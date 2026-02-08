@@ -19,4 +19,5 @@ public class BranchRepositoryAdapter extends ReactiveAdapterOperations<Branch, B
         return repository.findByNameAndFranchiseId(name, franchiseId)
                 .map(this::toEntity);
     }
+
 }

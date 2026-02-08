@@ -27,4 +27,17 @@ public class BranchUseCase {
                         }))
                 );
     }
+
+    public Mono<Branch> updateBranchName(Long id, Branch branch) {
+        if (branch.getName() == null || branch.getName().trim().isEmpty()) {
+            return Mono.error(new BusinessException("El nombre de la sucursal no puede estar vacío"));
+        }
+
+        return branchRepository.findById(id)
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException("No se encontró la sucursal con id: " + id)))
+                .flatMap(foundBranch -> {
+                    foundBranch.setName(branch.getName());
+                    return branchRepository.save(foundBranch);
+                });
+    }
 }

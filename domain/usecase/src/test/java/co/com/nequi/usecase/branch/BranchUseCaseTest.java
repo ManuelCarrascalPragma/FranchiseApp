@@ -73,4 +73,43 @@ class BranchUseCaseTest {
                         t.getMessage().contains("ya existe en esta franquicia"))
                 .verify();
     }
+
+    @Test
+    void updateBranchName_shouldUpdate_whenDataIsValid() {
+        Long branchId = 10L;
+        Branch existingBranch = Branch.builder().id(branchId).name("Nombre Viejo").build();
+        Branch updateInfo = Branch.builder().name("Nombre Nuevo").build();
+        Branch savedBranch = Branch.builder().id(branchId).name("Nombre Nuevo").build();
+
+        when(branchRepository.findById(branchId)).thenReturn(Mono.just(existingBranch));
+        when(branchRepository.save(any(Branch.class))).thenReturn(Mono.just(savedBranch));
+
+        StepVerifier.create(branchUseCase.updateBranchName(branchId, updateInfo))
+                .expectNextMatches(b -> b.getName().equals("Nombre Nuevo"))
+                .verifyComplete();
+    }
+
+    @Test
+    void updateBranchName_shouldReturnError_whenNameIsEmpty() {
+        Long branchId = 10L;
+        Branch invalidBranch = Branch.builder().name("   ").build();
+
+        StepVerifier.create(branchUseCase.updateBranchName(branchId, invalidBranch))
+                .expectErrorMatches(t -> t instanceof BusinessException &&
+                        t.getMessage().equals("El nombre de la sucursal no puede estar vacío"))
+                .verify();
+    }
+
+    @Test
+    void updateBranchName_shouldReturnError_whenBranchIdDoesNotExist() {
+        Long branchId = 999L;
+        Branch updateInfo = Branch.builder().name("Cualquier Nombre").build();
+
+        when(branchRepository.findById(branchId)).thenReturn(Mono.empty());
+
+        StepVerifier.create(branchUseCase.updateBranchName(branchId, updateInfo))
+                .expectErrorMatches(t -> t instanceof ResourceNotFoundException &&
+                        t.getMessage().contains("No se encontró la sucursal con id: " + branchId))
+                .verify();
+    }
 }
