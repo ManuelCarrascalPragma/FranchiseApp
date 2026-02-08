@@ -2,8 +2,10 @@ package co.com.nequi.config;
 
 import co.com.nequi.model.branch.gateways.BranchRepository;
 import co.com.nequi.model.franchise.gateways.FranchiseRepository;
+import co.com.nequi.model.product.gateways.ProductRepository;
 import co.com.nequi.usecase.branch.BranchUseCase;
 import co.com.nequi.usecase.franchise.FranchiseUseCase;
+import co.com.nequi.usecase.product.ProductUseCase;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -25,6 +27,11 @@ public class UseCasesConfig {
     @Bean
     public BranchUseCase branchUseCase(BranchRepository branchRepository, FranchiseRepository franchiseRepository) {
         return new BranchUseCase(branchRepository, franchiseRepository);
+    }
+
+    @Bean
+    public ProductUseCase productUseCase(ProductRepository productRepository, BranchRepository branchRepository) {
+        return new ProductUseCase(productRepository, branchRepository);
     }
 
 }

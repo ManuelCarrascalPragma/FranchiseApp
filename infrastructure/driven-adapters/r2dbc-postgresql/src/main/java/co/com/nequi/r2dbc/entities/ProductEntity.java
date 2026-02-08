@@ -17,5 +17,5 @@ public class ProductEntity {
     private String name;
     private Long stock;
     @Column("branch_id")
-    private String branchId;
+    private Long branchId;
 }
