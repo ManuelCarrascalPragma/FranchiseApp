@@ -41,4 +41,17 @@ public class ProductHandler {
                 })
                 .then(ServerResponse.noContent().build());
     }
+
+    public Mono<ServerResponse> updateStock(ServerRequest request) {
+        return Mono.defer(() -> {
+            Long branchId = Long.valueOf(request.pathVariable("branchId"));
+            Long productId = Long.valueOf(request.pathVariable("productId"));
+
+            return request.bodyToMono(Product.class)
+                    .flatMap(product -> productUseCase.updateProductStock(branchId, productId, product))
+                    .flatMap(updatedProduct -> ServerResponse.ok()
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .bodyValue(updatedProduct));
+        });
+    }
 }

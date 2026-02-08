@@ -60,4 +60,24 @@ public class ProductUseCase {
                         })
                 );
     }
+
+    public Mono<Product> updateProductStock(Long branchId, Long productId, Product productWithNewStock) {
+        if (productWithNewStock.getStock() == null || productWithNewStock.getStock() < 0) {
+            return Mono.error(new BusinessException("El stock debe ser un número mayor o igual a cero"));
+        }
+
+        return branchRepository.findById(branchId)
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException("Sucursal no encontrada")))
+                .flatMap(branch -> productRepository.findById(productId)
+                        .switchIfEmpty(Mono.error(new ResourceNotFoundException("Producto no encontrado")))
+                        .flatMap(foundProduct -> {
+                            if (!foundProduct.getBranchId().equals(branchId)) {
+                                return Mono.error(new BusinessException("El producto no pertenece a la sucursal"));
+                            }
+
+                            foundProduct.setStock(productWithNewStock.getStock());
+                            return productRepository.save(foundProduct);
+                        })
+                );
+    }
 }

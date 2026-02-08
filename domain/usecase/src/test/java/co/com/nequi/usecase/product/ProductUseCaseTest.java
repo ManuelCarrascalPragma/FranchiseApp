@@ -287,7 +287,7 @@ class ProductUseCaseTest {
         StepVerifier.create(productUseCase.deleteProductFromBranch(branchId, productId))
                 .expectErrorMatches(error ->
                         error instanceof BusinessException &&
-                                error.getMessage().equals("El producto no pertenece a la sucursal")
+                                error.getMessage().equals("El producto no pertenece a la sucursal indicada")
                 )
                 .verify();
 
@@ -305,10 +305,114 @@ class ProductUseCaseTest {
         StepVerifier.create(productUseCase.deleteProductFromBranch(branchId, productId))
                 .expectErrorMatches(error ->
                         error instanceof ResourceNotFoundException &&
-                                error.getMessage().equals("Producto no encontrado")
+                                error.getMessage().equals("No se encontró el producto con id: " + productId)
                 )
                 .verify();
 
         verify(productRepository, never()).deleteByIdAndBranchId(anyLong(), anyLong());
+    }
+
+    @Test
+    void updateProductStock_Success() {
+        Long productId = 50L;
+        Long newStock = 20L;
+        Product existingProduct = Product.builder()
+                .id(productId)
+                .name("Producto Existente")
+                .stock(10L)
+                .branchId(branchId)
+                .build();
+
+        Product updateInfo = Product.builder().stock(newStock).build();
+        Product savedProduct = existingProduct.toBuilder().stock(newStock).build();
+
+        when(branchRepository.findById(branchId)).thenReturn(Mono.just(branch));
+        when(productRepository.findById(productId)).thenReturn(Mono.just(existingProduct));
+        when(productRepository.save(any(Product.class))).thenReturn(Mono.just(savedProduct));
+
+        StepVerifier.create(productUseCase.updateProductStock(branchId, productId, updateInfo))
+                .expectNextMatches(p -> p.getStock().equals(newStock) && p.getId().equals(productId))
+                .verifyComplete();
+
+        verify(branchRepository).findById(branchId);
+        verify(productRepository).findById(productId);
+        verify(productRepository).save(any(Product.class));
+    }
+
+    @Test
+    void updateProductStock_NegativeStock_ShouldReturnError() {
+        Product updateInfo = Product.builder().stock(-10L).build();
+
+        StepVerifier.create(productUseCase.updateProductStock(branchId, 50L, updateInfo))
+                .expectErrorMatches(error ->
+                        error instanceof BusinessException &&
+                                error.getMessage().equals("El stock debe ser un número mayor o igual a cero")
+                )
+                .verify();
+
+        verify(productRepository, never()).findById(anyLong());
+    }
+
+    @Test
+    void updateProductStock_BranchNotFound_ShouldReturnError() {
+        Long productId = 50L;
+        Product updateInfo = Product.builder().stock(20L).build();
+
+        when(branchRepository.findById(branchId)).thenReturn(Mono.empty());
+
+        StepVerifier.create(productUseCase.updateProductStock(branchId, productId, updateInfo))
+                .expectErrorMatches(error ->
+                        error instanceof ResourceNotFoundException &&
+                                error.getMessage().equals("Sucursal no encontrada")
+                )
+                .verify();
+
+        verify(branchRepository).findById(branchId);
+        verify(productRepository, never()).findById(anyLong());
+    }
+
+    @Test
+    void updateProductStock_ProductNotFound_ShouldReturnError() {
+        Long productId = 50L;
+        Product updateInfo = Product.builder().stock(20L).build();
+
+        when(branchRepository.findById(branchId)).thenReturn(Mono.just(branch));
+        when(productRepository.findById(productId)).thenReturn(Mono.empty());
+
+        StepVerifier.create(productUseCase.updateProductStock(branchId, productId, updateInfo))
+                .expectErrorMatches(error ->
+                        error instanceof ResourceNotFoundException &&
+                                error.getMessage().equals("Producto no encontrado")
+                )
+                .verify();
+
+        verify(productRepository).findById(productId);
+        verify(productRepository, never()).save(any(Product.class));
+    }
+
+    @Test
+    void updateProductStock_WrongBranch_ShouldReturnError() {
+        Long productId = 50L;
+        Long otherBranchId = 99L;
+        Product productInOtherBranch = Product.builder()
+                .id(productId)
+                .branchId(otherBranchId)
+                .stock(10L)
+                .build();
+
+        Product updateInfo = Product.builder().stock(20L).build();
+
+        when(branchRepository.findById(branchId)).thenReturn(Mono.just(branch));
+        when(productRepository.findById(productId)).thenReturn(Mono.just(productInOtherBranch));
+
+        StepVerifier.create(productUseCase.updateProductStock(branchId, productId, updateInfo))
+                .expectErrorMatches(error ->
+                        error instanceof BusinessException &&
+                                error.getMessage().equals("El producto no pertenece a la sucursal")
+                )
+                .verify();
+
+        verify(productRepository).findById(productId);
+        verify(productRepository, never()).save(any(Product.class));
     }
 }

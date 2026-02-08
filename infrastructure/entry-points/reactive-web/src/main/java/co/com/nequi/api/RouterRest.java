@@ -155,6 +155,25 @@ public class RouterRest {
                                     @ApiResponse(responseCode = "404", description = "No encontrado")
                             }
                     )
+            ),
+            @RouterOperation(
+                    path = "/api/branches/{branchId}/products/{productId}/stock",
+                    method = RequestMethod.PATCH,
+                    beanClass = ProductHandler.class,
+                    beanMethod = "updateStock",
+                    operation = @Operation(
+                            operationId = "updateStock",
+                            summary = "Modificar el stock de un producto",
+                            parameters = {
+                                    @Parameter(name = "branchId", in = ParameterIn.PATH, required = true),
+                                    @Parameter(name = "productId", in = ParameterIn.PATH, required = true)
+                            },
+                            responses = {
+                                    @ApiResponse(responseCode = "200", description = "Stock actualizado"),
+                                    @ApiResponse(responseCode = "400", description = "Stock inválido o error de pertenencia"),
+                                    @ApiResponse(responseCode = "404", description = "No encontrado")
+                            }
+                    )
             )
     })
 
@@ -165,7 +184,8 @@ public class RouterRest {
                 .andRoute(PATCH("/api/branches/{id}"), branchHandler::updateBranch)
                 .andRoute(POST("/api/branches/{id}/products"), productHandler::addProduct)
                 .andRoute(PATCH("/api/products/{id}"), productHandler::updateProduct)
-                .andRoute(DELETE("/api/branches/{branchId}/products/{productId}"), productHandler::deleteProduct);
+                .andRoute(DELETE("/api/branches/{branchId}/products/{productId}"), productHandler::deleteProduct)
+                .andRoute(PATCH("/api/branches/{branchId}/products/{productId}/stock"), productHandler::updateStock);
     }
 
 }
