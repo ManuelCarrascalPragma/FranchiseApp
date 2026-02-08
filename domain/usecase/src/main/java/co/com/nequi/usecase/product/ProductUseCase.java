@@ -46,4 +46,18 @@ public class ProductUseCase {
                     return productRepository.save(foundProduct);
                 });
     }
+
+    public Mono<Void> deleteProductFromBranch(Long branchId, Long productId) {
+        return branchRepository.findById(branchId)
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException("No se encontró la sucursal con id: " + branchId)))
+                .flatMap(branch -> productRepository.findById(productId)
+                        .switchIfEmpty(Mono.error(new ResourceNotFoundException("No se encontró el producto con id: " + productId)))
+                        .flatMap(product -> {
+                            if (!product.getBranchId().equals(branchId)) {
+                                return Mono.error(new BusinessException("El producto no pertenece a la sucursal indicada"));
+                            }
+                            return productRepository.deleteByIdAndBranchId(productId, branchId);
+                        })
+                );
+    }
 }

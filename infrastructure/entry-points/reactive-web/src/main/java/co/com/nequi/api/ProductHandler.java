@@ -32,4 +32,13 @@ public class ProductHandler {
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(updateProduct));
     }
+
+    public Mono<ServerResponse> deleteProduct(ServerRequest request) {
+        return Mono.defer(() -> {
+                    Long branchId = Long.valueOf(request.pathVariable("branchId"));
+                    Long productId = Long.valueOf(request.pathVariable("productId"));
+                    return productUseCase.deleteProductFromBranch(branchId, productId);
+                })
+                .then(ServerResponse.noContent().build());
+    }
 }

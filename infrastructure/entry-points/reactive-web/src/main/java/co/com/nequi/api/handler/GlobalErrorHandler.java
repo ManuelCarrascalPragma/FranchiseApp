@@ -15,6 +15,7 @@ import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.*;
+import org.springframework.web.reactive.resource.NoResourceFoundException;
 import org.springframework.web.server.ServerWebInputException;
 import reactor.core.publisher.Mono;
 
@@ -37,6 +38,7 @@ public class GlobalErrorHandler extends AbstractErrorWebExceptionHandler {
 
     private Mono<ServerResponse> renderErrorResponse(ServerRequest request) {
         Throwable error = getError(request);
+
         HttpStatus status;
         String message;
 
@@ -49,7 +51,10 @@ public class GlobalErrorHandler extends AbstractErrorWebExceptionHandler {
         } else if (error instanceof NumberFormatException) {
             status = HttpStatus.BAD_REQUEST;
             message = "El ID proporcionado debe ser un número válido";
-        }else if (error instanceof ServerWebInputException) {
+        } else if (error instanceof NoResourceFoundException) {
+        status = HttpStatus.NOT_FOUND;
+        message = "La ruta solicitada no existe";
+        } else if (error instanceof ServerWebInputException) {
             status = HttpStatus.BAD_REQUEST;
             message = "Error en el formato de los datos de entrada";
         }else {

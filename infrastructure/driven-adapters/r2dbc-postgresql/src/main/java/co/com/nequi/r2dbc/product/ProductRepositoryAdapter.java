@@ -20,4 +20,9 @@ public class ProductRepositoryAdapter extends ReactiveAdapterOperations<Product,
         return repository.findByNameAndBranchId(name, branchId)
                 .map(this::toEntity);
     }
+
+    @Override
+    public Mono<Void> deleteByIdAndBranchId(Long id, Long branchId) {
+        return repository.deleteByIdAndBranchId(id, branchId);
+    }
 }

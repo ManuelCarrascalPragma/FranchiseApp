@@ -9,4 +9,6 @@ public interface ProductReactiveRepository extends ReactiveCrudRepository<Produc
         ReactiveQueryByExampleExecutor<ProductEntity> {
 
     Mono<ProductEntity> findByNameAndBranchId(String name, Long branchId);
+
+    Mono<Void> deleteByIdAndBranchId(Long id, Long branchId);
 }

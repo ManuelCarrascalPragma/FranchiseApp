@@ -250,4 +250,65 @@ class ProductUseCaseTest {
         verify(productRepository).findById(productId);
         verify(productRepository, never()).save(any(Product.class));
     }
+
+    @Test
+    void deleteProduct_Success() {
+        Long productId = 50L;
+        Product existingProduct = Product.builder()
+                .id(productId)
+                .branchId(branchId)
+                .build();
+
+        when(branchRepository.findById(branchId)).thenReturn(Mono.just(branch));
+        when(productRepository.findById(productId)).thenReturn(Mono.just(existingProduct));
+        when(productRepository.deleteByIdAndBranchId(productId, branchId)).thenReturn(Mono.empty());
+
+        StepVerifier.create(productUseCase.deleteProductFromBranch(branchId, productId))
+                .verifyComplete();
+
+        verify(branchRepository).findById(branchId);
+        verify(productRepository).findById(productId);
+        verify(productRepository).deleteByIdAndBranchId(productId, branchId);
+    }
+
+    @Test
+    void deleteProduct_WrongBranch_ShouldReturnError() {
+        Long otherBranchId = 99L;
+        Long productId = 50L;
+
+        Product productInOtherBranch = Product.builder()
+                .id(productId)
+                .branchId(otherBranchId)
+                .build();
+
+        when(branchRepository.findById(branchId)).thenReturn(Mono.just(branch));
+        when(productRepository.findById(productId)).thenReturn(Mono.just(productInOtherBranch));
+
+        StepVerifier.create(productUseCase.deleteProductFromBranch(branchId, productId))
+                .expectErrorMatches(error ->
+                        error instanceof BusinessException &&
+                                error.getMessage().equals("El producto no pertenece a la sucursal")
+                )
+                .verify();
+
+        verify(productRepository).findById(productId);
+        verify(productRepository, never()).deleteByIdAndBranchId(anyLong(), anyLong());
+    }
+
+    @Test
+    void deleteProduct_NotFound_ShouldReturnError() {
+        Long productId = 88L;
+
+        when(branchRepository.findById(branchId)).thenReturn(Mono.just(branch));
+        when(productRepository.findById(productId)).thenReturn(Mono.empty());
+
+        StepVerifier.create(productUseCase.deleteProductFromBranch(branchId, productId))
+                .expectErrorMatches(error ->
+                        error instanceof ResourceNotFoundException &&
+                                error.getMessage().equals("Producto no encontrado")
+                )
+                .verify();
+
+        verify(productRepository, never()).deleteByIdAndBranchId(anyLong(), anyLong());
+    }
 }
