@@ -17,8 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
-import static org.springframework.web.reactive.function.server.RequestPredicates.PATCH;
-import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
+import static org.springframework.web.reactive.function.server.RequestPredicates.*;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 @Configuration
@@ -138,6 +137,24 @@ public class RouterRest {
                                     @ApiResponse(responseCode = "404", description = "Producto no encontrado")
                             }
                     )
+            ),
+            @RouterOperation(
+                    path = "/api/branches/{branchId}/products/{productId}",
+                    method = RequestMethod.DELETE,
+                    beanClass = ProductHandler.class,
+                    beanMethod = "deleteProduct",
+                    operation = @Operation(
+                            operationId = "deleteProduct",
+                            summary = "Eliminar un producto de una sucursal específica",
+                            parameters = {
+                                    @Parameter(name = "branchId", in = ParameterIn.PATH, required = true),
+                                    @Parameter(name = "productId", in = ParameterIn.PATH, required = true)
+                            },
+                            responses = {
+                                    @ApiResponse(responseCode = "204", description = "Producto eliminado"),
+                                    @ApiResponse(responseCode = "404", description = "No encontrado")
+                            }
+                    )
             )
     })
 
@@ -147,7 +164,8 @@ public class RouterRest {
                 .andRoute(POST("/api/franchises/{id}/branches"), branchHandler::addBranchToFranchise)
                 .andRoute(PATCH("/api/branches/{id}"), branchHandler::updateBranch)
                 .andRoute(POST("/api/branches/{id}/products"), productHandler::addProduct)
-                .andRoute(PATCH("/api/products/{id}"), productHandler::updateProduct);
+                .andRoute(PATCH("/api/products/{id}"), productHandler::updateProduct)
+                .andRoute(DELETE("/api/branches/{branchId}/products/{productId}"), productHandler::deleteProduct);
     }
 
 }
