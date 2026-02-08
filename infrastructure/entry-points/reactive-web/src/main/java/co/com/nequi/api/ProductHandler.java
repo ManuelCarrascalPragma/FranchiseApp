@@ -23,4 +23,13 @@ public class ProductHandler {
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(savedProduct));
     }
+
+    public Mono<ServerResponse> updateProduct(ServerRequest request) {
+        Long id = Long.valueOf(request.pathVariable("id"));
+        return request.bodyToMono(Product.class)
+                .flatMap(product -> productUseCase.updateProduct(id, product))
+                .flatMap(updateProduct-> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(updateProduct));
+    }
 }

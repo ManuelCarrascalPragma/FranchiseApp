@@ -17,10 +17,7 @@ import reactor.test.StepVerifier;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProductUseCaseTest {
@@ -194,6 +191,63 @@ class ProductUseCaseTest {
 
         verify(branchRepository).findById(branchId);
         verify(productRepository).findByNameAndBranchId(product.getName(), branchId);
+        verify(productRepository, never()).save(any(Product.class));
+    }
+
+    @Test
+    void updateProduct_Success() {
+        Long productId = 1L;
+        Product existingProduct = Product.builder()
+                .id(productId)
+                .name("Nombre Antiguo")
+                .stock(10L)
+                .branchId(branchId)
+                .build();
+
+        Product updateInfo = Product.builder().name("Nombre Nuevo").build();
+        Product savedProduct = existingProduct.toBuilder().name("Nombre Nuevo").build();
+
+        when(productRepository.findById(productId)).thenReturn(Mono.just(existingProduct));
+        when(productRepository.save(any(Product.class))).thenReturn(Mono.just(savedProduct));
+
+        StepVerifier.create(productUseCase.updateProduct(productId, updateInfo))
+                .expectNextMatches(p -> p.getName().equals("Nombre Nuevo") && p.getId().equals(productId))
+                .verifyComplete();
+
+        verify(productRepository).findById(productId);
+        verify(productRepository).save(any(Product.class));
+    }
+
+    @Test
+    void updateProduct_WithEmptyName_ShouldReturnError() {
+        Product updateInfo = Product.builder().name("   ").build();
+
+        StepVerifier.create(productUseCase.updateProduct(1L, updateInfo))
+                .expectErrorMatches(error ->
+                        error instanceof BusinessException &&
+                                error.getMessage().equals("El nombre del producto es obligatorio")
+                )
+                .verify();
+
+        verify(productRepository, never()).findById(anyLong());
+        verify(productRepository, never()).save(any(Product.class));
+    }
+
+    @Test
+    void updateProduct_NotFound_ShouldReturnError() {
+        Long productId = 99L;
+        Product updateInfo = Product.builder().name("Nuevo Nombre").build();
+
+        when(productRepository.findById(productId)).thenReturn(Mono.empty());
+
+        StepVerifier.create(productUseCase.updateProduct(productId, updateInfo))
+                .expectErrorMatches(error ->
+                        error instanceof ResourceNotFoundException &&
+                                error.getMessage().equals("No se encontró el producto con id: " + productId)
+                )
+                .verify();
+
+        verify(productRepository).findById(productId);
         verify(productRepository, never()).save(any(Product.class));
     }
 }
