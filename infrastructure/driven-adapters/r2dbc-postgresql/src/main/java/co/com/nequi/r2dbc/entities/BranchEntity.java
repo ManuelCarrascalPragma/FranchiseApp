@@ -17,5 +17,5 @@ public class BranchEntity {
     private String name;
 
     @Column("franchise_id")
-    private String franchiseId;
+    private Long franchiseId;
 }

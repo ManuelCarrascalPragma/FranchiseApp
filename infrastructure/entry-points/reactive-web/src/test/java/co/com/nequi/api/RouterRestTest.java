@@ -1,6 +1,7 @@
 package co.com.nequi.api;
 
 import co.com.nequi.model.franchise.Franchise;
+import co.com.nequi.usecase.branch.BranchUseCase;
 import co.com.nequi.usecase.franchise.FranchiseUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,11 +24,15 @@ class RouterRestTest {
     @Mock
     private FranchiseUseCase franchiseUseCase;
 
+    @Mock
+    private BranchUseCase branchUseCase;
+
     @BeforeEach
     void setUp() {
         FranchiseHandler handler = new FranchiseHandler(franchiseUseCase);
+        BranchHandler branchHandler = new BranchHandler(branchUseCase);
         RouterRest routerRest = new RouterRest();
-        webTestClient = WebTestClient.bindToRouterFunction(routerRest.routerFunction(handler)).build();
+        webTestClient = WebTestClient.bindToRouterFunction(routerRest.routerFunction(handler, branchHandler)).build();
     }
 
     @Test
