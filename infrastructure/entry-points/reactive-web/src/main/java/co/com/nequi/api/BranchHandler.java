@@ -23,4 +23,13 @@ public class BranchHandler {
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(savedBranch));
     }
+
+    public Mono<ServerResponse> updateBranch(ServerRequest request) {
+        Long id = Long.valueOf(request.pathVariable("id"));
+        return request.bodyToMono(Branch.class)
+                .flatMap(branch -> branchUseCase.updateBranchName(id, branch))
+                .flatMap(updatedBranch -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(updatedBranch));
+    }
 }

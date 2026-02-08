@@ -94,14 +94,44 @@ public class RouterRest {
                                     content = @Content(schema = @Schema(implementation = co.com.nequi.model.branch.Branch.class))
                             )
                     )
+            ),
+            @RouterOperation(
+                    path = "/api/branches/{id}",
+                    method = RequestMethod.PATCH,
+                    beanClass = BranchHandler.class,
+                    beanMethod = "updateBranch",
+                    operation = @Operation(
+                            operationId = "updateBranch",
+                            summary = "Actualizar nombre de una sucursal",
+                            parameters = @Parameter(name = "id", in = ParameterIn.PATH, required = true),
+                            responses = {
+                                    @ApiResponse(responseCode = "200", description = "Nombre actualizado"),
+                                    @ApiResponse(responseCode = "404", description = "Sucursal no encontrada")
+                            }
+                    )
+            ),
+            @RouterOperation(
+                    path = "/api/branches/{id}/products",
+                    method = RequestMethod.POST,
+                    beanClass = ProductHandler.class,
+                    beanMethod = "addProduct",
+                    operation = @Operation(
+                            operationId = "addProduct",
+                            summary = "Agregar producto a una sucursal",
+                            responses = {
+                                    @ApiResponse(responseCode = "201", description = "Producto creado"),
+                                    @ApiResponse(responseCode = "404", description = "Sucursal no encontrada")
+                            }
+                    )
             )
     })
 
-    public RouterFunction<ServerResponse> routerFunction(FranchiseHandler handler, BranchHandler branchHandler) {
+    public RouterFunction<ServerResponse> routerFunction(FranchiseHandler handler, BranchHandler branchHandler, ProductHandler productHandler) {
         return route(POST("/api/franchises"), handler::createFranchise)
                 .andRoute(PATCH("/api/franchises/{id}"), handler::updateFranchise)
-                .andRoute(POST("/api/franchises/{id}/branches"), branchHandler::addBranchToFranchise);
+                .andRoute(POST("/api/franchises/{id}/branches"), branchHandler::addBranchToFranchise)
+                .andRoute(PATCH("/api/branches/{id}"), branchHandler::updateBranch)
+                .andRoute(POST("/api/branches/{id}/products"), productHandler::addProduct);
     }
-
 
 }
