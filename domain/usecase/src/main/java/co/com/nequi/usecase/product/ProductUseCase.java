@@ -33,4 +33,17 @@ public class ProductUseCase {
                                 }))
                 );
     }
+
+    public Mono<Product> updateProduct(Long id, Product product) {
+        if(product.getName() == null || product.getName().trim().isEmpty()) {
+            return Mono.error(new BusinessException("El nombre del producto es obligatorio"));
+        }
+
+        return productRepository.findById(id)
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException("No se encontró el producto con id: " + id)))
+                .flatMap(foundProduct -> {
+                    foundProduct.setName(product.getName());
+                    return productRepository.save(foundProduct);
+                });
+    }
 }

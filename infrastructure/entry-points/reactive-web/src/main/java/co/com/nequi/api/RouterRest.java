@@ -123,6 +123,21 @@ public class RouterRest {
                                     @ApiResponse(responseCode = "404", description = "Sucursal no encontrada")
                             }
                     )
+            ),
+            @RouterOperation(
+                    path = "/api/products/{id}",
+                    method = RequestMethod.PATCH,
+                    beanClass = ProductHandler.class,
+                    beanMethod = "updateProduct",
+                    operation = @Operation(
+                            operationId = "updateProduct",
+                            summary = "Actualizar nombre de un producto",
+                            parameters = @Parameter(name = "id", in = ParameterIn.PATH, required = true),
+                            responses = {
+                                    @ApiResponse(responseCode = "200", description = "Nombre de producto actualizado"),
+                                    @ApiResponse(responseCode = "404", description = "Producto no encontrado")
+                            }
+                    )
             )
     })
 
@@ -131,7 +146,8 @@ public class RouterRest {
                 .andRoute(PATCH("/api/franchises/{id}"), handler::updateFranchise)
                 .andRoute(POST("/api/franchises/{id}/branches"), branchHandler::addBranchToFranchise)
                 .andRoute(PATCH("/api/branches/{id}"), branchHandler::updateBranch)
-                .andRoute(POST("/api/branches/{id}/products"), productHandler::addProduct);
+                .andRoute(POST("/api/branches/{id}/products"), productHandler::addProduct)
+                .andRoute(PATCH("/api/products/{id}"), productHandler::updateProduct);
     }
 
 }
