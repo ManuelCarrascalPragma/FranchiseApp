@@ -62,11 +62,45 @@ public class RouterRest {
                             parameters = @Parameter(name = "id", in = ParameterIn.PATH, required = true),
                             requestBody = @RequestBody(content = @Content(schema = @Schema(implementation = Franchise.class)))
                     )
+            ),
+            @RouterOperation(
+                    path = "/api/franchises/{id}/branches",
+                    produces = {MediaType.APPLICATION_JSON_VALUE},
+                    method = RequestMethod.POST,
+                    beanClass = BranchHandler.class,
+                    beanMethod = "addBranchToFranchise",
+                    operation = @Operation(
+                            operationId = "addBranchToFranchise",
+                            summary = "Agregar una sucursal a una franquicia",
+                            description = "Crea una sucursal y la vincula a la franquicia indicada en el ID de la ruta",
+                            responses = {
+                                    @ApiResponse(
+                                            responseCode = "201",
+                                            description = "Sucursal creada y vinculada exitosamente"
+                                    ),
+                                    @ApiResponse(responseCode = "404", description = "La franquicia padre no existe"),
+                                    @ApiResponse(responseCode = "400", description = "Datos de sucursal inválidos o nombre duplicado")
+                            },
+                            parameters = {
+                                    @Parameter(
+                                            name = "id",
+                                            description = "ID de la franquicia existente",
+                                            in = ParameterIn.PATH,
+                                            required = true
+                                    )
+                            },
+                            requestBody = @RequestBody(
+                                    description = "Objeto sucursal a crear (solo requiere el nombre)",
+                                    content = @Content(schema = @Schema(implementation = co.com.nequi.model.branch.Branch.class))
+                            )
+                    )
             )
     })
-    public RouterFunction<ServerResponse> routerFunction(FranchiseHandler handler) {
+
+    public RouterFunction<ServerResponse> routerFunction(FranchiseHandler handler, BranchHandler branchHandler) {
         return route(POST("/api/franchises"), handler::createFranchise)
-                .andRoute(PATCH("/api/franchises/{id}"), handler::updateFranchise);
+                .andRoute(PATCH("/api/franchises/{id}"), handler::updateFranchise)
+                .andRoute(POST("/api/franchises/{id}/branches"), branchHandler::addBranchToFranchise);
     }
 
 

@@ -1,5 +1,6 @@
 package co.com.nequi.config;
 
+import co.com.nequi.model.branch.gateways.BranchRepository;
 import co.com.nequi.model.franchise.gateways.FranchiseRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -38,14 +39,9 @@ class UseCasesConfigTest {
         }
 
         @Bean
-        public MyUseCase myUseCase() {
-            return new MyUseCase();
-        }
+        public BranchRepository branchRepository() {return mock(BranchRepository.class);}
+
     }
 
-    static class MyUseCase {
-        public String execute() {
-            return "MyUseCase Test";
-        }
-    }
+
 }

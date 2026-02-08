@@ -1,5 +1,6 @@
 package co.com.nequi.api;
 
+import co.com.nequi.api.config.TestUseCasesConfig;
 import co.com.nequi.model.exceptions.BusinessException;
 import co.com.nequi.model.franchise.Franchise;
 import co.com.nequi.usecase.franchise.FranchiseUseCase;
@@ -7,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -20,6 +22,7 @@ import static org.mockito.Mockito.when;
 @TestPropertySource(properties = {
     "cors.allowed-origins=http://localhost:8080"
 })
+@Import(TestUseCasesConfig.class)
 class FranchiseIntegrationTest {
 
     @Autowired

@@ -4,10 +4,12 @@ import lombok.*;
 
 import java.util.List;
 
-@Value
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder(toBuilder = true)
 public class Branch {
-    Long id;
-    String name;
-    List<Product> products;
+    private Long id;
+    private String name;
+    private Long franchiseId;
 }
