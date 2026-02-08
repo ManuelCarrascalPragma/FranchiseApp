@@ -2,10 +2,12 @@ package co.com.nequi.api.config;
 
 import co.com.nequi.api.BranchHandler;
 import co.com.nequi.api.FranchiseHandler;
+import co.com.nequi.api.ProductHandler;
 import co.com.nequi.api.RouterRest;
 import co.com.nequi.model.franchise.Franchise;
 import co.com.nequi.usecase.branch.BranchUseCase;
 import co.com.nequi.usecase.franchise.FranchiseUseCase;
+import co.com.nequi.usecase.product.ProductUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,13 +32,17 @@ class ConfigTest {
 
     @Mock
     private BranchUseCase branchUseCase;
+    
+    @Mock
+    private ProductUseCase productUseCase;
 
     @BeforeEach
     void setUp() {
-        FranchiseHandler handler = new FranchiseHandler(franchiseUseCase);
+        FranchiseHandler franchiseHandler = new FranchiseHandler(franchiseUseCase);
         BranchHandler branchHandler = new BranchHandler(branchUseCase);
+        ProductHandler productHandler = new ProductHandler(productUseCase);
         RouterRest routerRest = new RouterRest();
-        RouterFunction<ServerResponse> routerFunction = routerRest.routerFunction(handler, branchHandler);
+        RouterFunction<ServerResponse> routerFunction = routerRest.routerFunction(franchiseHandler, branchHandler, productHandler);
         
         SecurityHeadersConfig securityHeadersConfig = new SecurityHeadersConfig();
         
