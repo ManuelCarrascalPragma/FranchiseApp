@@ -6,6 +6,7 @@ import co.com.nequi.model.exceptions.BusinessException;
 import co.com.nequi.model.exceptions.ResourceNotFoundException;
 import co.com.nequi.model.franchise.Franchise;
 import co.com.nequi.model.franchise.gateways.FranchiseRepository;
+import co.com.nequi.usecase.constants.ErrorMessages;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -70,7 +71,7 @@ class BranchUseCaseTest {
 
         StepVerifier.create(branchUseCase.addBranchToFranchise(fId, branchInput))
                 .expectErrorMatches(t -> t instanceof BusinessException &&
-                        t.getMessage().contains("ya existe en esta franquicia"))
+                        t.getMessage().equals(String.format(ErrorMessages.BRANCH_NAME_ALREADY_EXISTS, "Duplicada")))
                 .verify();
     }
 
@@ -96,7 +97,7 @@ class BranchUseCaseTest {
 
         StepVerifier.create(branchUseCase.updateBranchName(branchId, invalidBranch))
                 .expectErrorMatches(t -> t instanceof BusinessException &&
-                        t.getMessage().equals("El nombre de la sucursal no puede estar vacío"))
+                        t.getMessage().equals(ErrorMessages.BRANCH_NAME_REQUIRED))
                 .verify();
     }
 
@@ -109,7 +110,7 @@ class BranchUseCaseTest {
 
         StepVerifier.create(branchUseCase.updateBranchName(branchId, updateInfo))
                 .expectErrorMatches(t -> t instanceof ResourceNotFoundException &&
-                        t.getMessage().contains("No se encontró la sucursal con id: " + branchId))
+                        t.getMessage().equals(String.format(ErrorMessages.BRANCH_NOT_FOUND, branchId)))
                 .verify();
     }
 }

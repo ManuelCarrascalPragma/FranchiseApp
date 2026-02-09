@@ -4,6 +4,7 @@ import co.com.nequi.model.exceptions.BusinessException;
 import co.com.nequi.model.exceptions.ResourceNotFoundException;
 import co.com.nequi.model.franchise.Franchise;
 import co.com.nequi.model.franchise.gateways.FranchiseRepository;
+import co.com.nequi.usecase.constants.ErrorMessages;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,7 +53,7 @@ class FranchiseUseCaseTest {
 
         StepVerifier.create(franchiseUseCase.createFranchise(franchise))
                 .expectErrorMatches(throwable -> throwable instanceof BusinessException &&
-                        throwable.getMessage().equals("Franchise name is empty"))
+                        throwable.getMessage().equals(ErrorMessages.FRANCHISE_NAME_REQUIRED))
                 .verify();
     }
 
@@ -65,7 +66,7 @@ class FranchiseUseCaseTest {
 
         StepVerifier.create(franchiseUseCase.createFranchise(franchise))
                 .expectErrorMatches(throwable -> throwable instanceof BusinessException &&
-                        throwable.getMessage().equals("Franchise name is empty"))
+                        throwable.getMessage().equals(ErrorMessages.FRANCHISE_NAME_REQUIRED))
                 .verify();
     }
 
@@ -90,7 +91,7 @@ class FranchiseUseCaseTest {
 
         StepVerifier.create(franchiseUseCase.updateFranchise(1L, invalidFranchise))
                 .expectErrorMatches(t -> t instanceof BusinessException &&
-                        t.getMessage().equals("El nuevo nombre es obligatorio"))
+                        t.getMessage().equals(ErrorMessages.FRANCHISE_NAME_REQUIRED))
                 .verify();
     }
 
@@ -103,7 +104,7 @@ class FranchiseUseCaseTest {
 
         StepVerifier.create(franchiseUseCase.updateFranchise(id, updateInfo))
                 .expectErrorMatches(t -> t instanceof ResourceNotFoundException &&
-                        t.getMessage().contains("No se encontró la franquicia"))
+                        t.getMessage().equals(String.format(ErrorMessages.FRANCHISE_NOT_FOUND, id)))
                 .verify();
     }
 }
