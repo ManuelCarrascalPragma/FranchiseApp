@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import co.com.nequi.api.constants.*;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -17,7 +18,7 @@ public class ProductHandler {
     private final ProductUseCase productUseCase;
 
     public Mono<ServerResponse> addProduct(ServerRequest request) {
-        Long branchId = Long.valueOf(request.pathVariable("id"));
+        Long branchId = Long.valueOf(request.pathVariable(ApiConstants.ID_PARAM_NAME));
         return request.bodyToMono(Product.class)
                 .flatMap(product -> productUseCase.addProductToBranch(branchId, product))
                 .flatMap(savedProduct -> ServerResponse.status(HttpStatus.CREATED)
@@ -26,7 +27,7 @@ public class ProductHandler {
     }
 
     public Mono<ServerResponse> updateProduct(ServerRequest request) {
-        Long id = Long.valueOf(request.pathVariable("id"));
+        Long id = Long.valueOf(request.pathVariable(ApiConstants.ID_PARAM_NAME));
         return request.bodyToMono(Product.class)
                 .flatMap(product -> productUseCase.updateProduct(id, product))
                 .flatMap(updateProduct-> ServerResponse.ok()
@@ -36,8 +37,8 @@ public class ProductHandler {
 
     public Mono<ServerResponse> deleteProduct(ServerRequest request) {
         return Mono.defer(() -> {
-                    Long branchId = Long.valueOf(request.pathVariable("branchId"));
-                    Long productId = Long.valueOf(request.pathVariable("productId"));
+                    Long branchId = Long.valueOf(request.pathVariable(ApiConstants.BRANCH_ID_PARAM_NAME));
+                    Long productId = Long.valueOf(request.pathVariable(ApiConstants.PRODUCT_ID_PARAM_NAME));
                     return productUseCase.deleteProductFromBranch(branchId, productId);
                 })
                 .then(ServerResponse.noContent().build());
@@ -45,8 +46,8 @@ public class ProductHandler {
 
     public Mono<ServerResponse> updateStock(ServerRequest request) {
         return Mono.defer(() -> {
-            Long branchId = Long.valueOf(request.pathVariable("branchId"));
-            Long productId = Long.valueOf(request.pathVariable("productId"));
+            Long branchId = Long.valueOf(request.pathVariable(ApiConstants.BRANCH_ID_PARAM_NAME));
+            Long productId = Long.valueOf(request.pathVariable(ApiConstants.PRODUCT_ID_PARAM_NAME));
 
             return request.bodyToMono(Product.class)
                     .flatMap(product -> productUseCase.updateProductStock(branchId, productId, product))
@@ -57,7 +58,7 @@ public class ProductHandler {
     }
 
     public Mono<ServerResponse> getMaxStockReport(ServerRequest request) {
-        Long franchiseId = Long.valueOf(request.pathVariable("franchiseId"));
+        Long franchiseId = Long.valueOf(request.pathVariable(ApiConstants.FRANCHISE_ID_PARAM_NAME));
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(productUseCase.getMaxStockProductsByFranchise(franchiseId), ProductMaxStock.class);

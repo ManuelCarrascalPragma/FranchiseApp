@@ -1,5 +1,6 @@
 package co.com.nequi.api;
 
+import co.com.nequi.api.constants.*;
 import co.com.nequi.model.branch.Branch;
 import co.com.nequi.usecase.branch.BranchUseCase;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,7 @@ public class BranchHandler {
     private final BranchUseCase branchUseCase;
 
     public Mono<ServerResponse> addBranchToFranchise(ServerRequest request) {
-        Long id = Long.valueOf(request.pathVariable("id"));
+        Long id = Long.valueOf(request.pathVariable(ApiConstants.ID_PARAM_NAME));
         return request.bodyToMono(Branch.class)
                 .flatMap(branch -> branchUseCase.addBranchToFranchise(id, branch))
                 .flatMap(savedBranch -> ServerResponse.status(HttpStatus.CREATED)
@@ -25,7 +26,7 @@ public class BranchHandler {
     }
 
     public Mono<ServerResponse> updateBranch(ServerRequest request) {
-        Long id = Long.valueOf(request.pathVariable("id"));
+        Long id = Long.valueOf(request.pathVariable(ApiConstants.ID_PARAM_NAME));
         return request.bodyToMono(Branch.class)
                 .flatMap(branch -> branchUseCase.updateBranchName(id, branch))
                 .flatMap(updatedBranch -> ServerResponse.ok()

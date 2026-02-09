@@ -3,7 +3,9 @@ package co.com.nequi.api.config;
 import co.com.nequi.api.BranchHandler;
 import co.com.nequi.api.FranchiseHandler;
 import co.com.nequi.api.ProductHandler;
-import co.com.nequi.api.RouterRest;
+import co.com.nequi.api.router.BranchRouter;
+import co.com.nequi.api.router.FranchiseRouter;
+import co.com.nequi.api.router.ProductRouter;
 import co.com.nequi.model.franchise.Franchise;
 import co.com.nequi.usecase.branch.BranchUseCase;
 import co.com.nequi.usecase.franchise.FranchiseUseCase;
@@ -41,8 +43,14 @@ class ConfigTest {
         FranchiseHandler franchiseHandler = new FranchiseHandler(franchiseUseCase);
         BranchHandler branchHandler = new BranchHandler(branchUseCase);
         ProductHandler productHandler = new ProductHandler(productUseCase);
-        RouterRest routerRest = new RouterRest();
-        RouterFunction<ServerResponse> routerFunction = routerRest.routerFunction(franchiseHandler, branchHandler, productHandler);
+        
+        FranchiseRouter franchiseRouter = new FranchiseRouter();
+        BranchRouter branchRouter = new BranchRouter();
+        ProductRouter productRouter = new ProductRouter();
+        
+        RouterFunction<ServerResponse> routerFunction = franchiseRouter.franchiseRoutes(franchiseHandler)
+                .and(branchRouter.branchRoutes(branchHandler))
+                .and(productRouter.productRoutes(productHandler));
         
         SecurityHeadersConfig securityHeadersConfig = new SecurityHeadersConfig();
         

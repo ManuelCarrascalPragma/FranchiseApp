@@ -5,6 +5,7 @@ import co.com.nequi.model.branch.gateways.BranchRepository;
 import co.com.nequi.model.exceptions.BusinessException;
 import co.com.nequi.model.exceptions.ResourceNotFoundException;
 import co.com.nequi.model.franchise.gateways.FranchiseRepository;
+import co.com.nequi.usecase.constants.ErrorMessages;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
@@ -15,11 +16,12 @@ public class BranchUseCase {
 
     public Mono<Branch> addBranchToFranchise(Long franchiseId, Branch branch) {
         return franchiseRepository.findById(franchiseId)
-                .switchIfEmpty(Mono.error(new ResourceNotFoundException("Franquicia no encontrada")))
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException(
+                        String.format(ErrorMessages.FRANCHISE_NOT_FOUND, franchiseId))))
                 .flatMap(franchise -> branchRepository.findByNameAndFranchiseId(branch.getName(), franchiseId)
                         .flatMap(exists -> Mono.<Branch>error(
                                 new BusinessException(
-                                        "La sucursal '" + branch.getName() + "' ya existe en esta franquicia"
+                                        String.format(ErrorMessages.BRANCH_NAME_ALREADY_EXISTS, branch.getName())
                                 )))
                         .switchIfEmpty(Mono.defer(() -> {
                             branch.setFranchiseId(franchiseId);
@@ -30,11 +32,12 @@ public class BranchUseCase {
 
     public Mono<Branch> updateBranchName(Long id, Branch branch) {
         if (branch.getName() == null || branch.getName().trim().isEmpty()) {
-            return Mono.error(new BusinessException("El nombre de la sucursal no puede estar vacío"));
+            return Mono.error(new BusinessException(ErrorMessages.BRANCH_NAME_REQUIRED));
         }
 
         return branchRepository.findById(id)
-                .switchIfEmpty(Mono.error(new ResourceNotFoundException("No se encontró la sucursal con id: " + id)))
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException(
+                        String.format(ErrorMessages.BRANCH_NOT_FOUND, id))))
                 .flatMap(foundBranch -> {
                     foundBranch.setName(branch.getName());
                     return branchRepository.save(foundBranch);

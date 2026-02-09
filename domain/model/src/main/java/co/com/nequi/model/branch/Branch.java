@@ -1,8 +1,9 @@
 package co.com.nequi.model.branch;
-import co.com.nequi.model.product.Product;
-import lombok.*;
 
-import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor

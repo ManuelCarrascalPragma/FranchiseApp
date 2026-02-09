@@ -7,6 +7,7 @@ import co.com.nequi.model.exceptions.ResourceNotFoundException;
 import co.com.nequi.model.product.Product;
 import co.com.nequi.model.product.ProductMaxStock;
 import co.com.nequi.model.product.gateways.ProductRepository;
+import co.com.nequi.usecase.constants.ErrorMessages;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -85,7 +86,7 @@ class ProductUseCaseTest {
         StepVerifier.create(productUseCase.addProductToBranch(branchId, product))
                 .expectErrorMatches(error ->
                         error instanceof BusinessException &&
-                        error.getMessage().equals("El nombre del producto es obligatorio")
+                        error.getMessage().equals(ErrorMessages.PRODUCT_NAME_REQUIRED)
                 )
                 .verify();
 
@@ -100,7 +101,7 @@ class ProductUseCaseTest {
         StepVerifier.create(productUseCase.addProductToBranch(branchId, product))
                 .expectErrorMatches(error ->
                         error instanceof BusinessException &&
-                        error.getMessage().equals("El nombre del producto es obligatorio")
+                        error.getMessage().equals(ErrorMessages.PRODUCT_NAME_REQUIRED)
                 )
                 .verify();
 
@@ -115,7 +116,7 @@ class ProductUseCaseTest {
         StepVerifier.create(productUseCase.addProductToBranch(branchId, product))
                 .expectErrorMatches(error ->
                         error instanceof BusinessException &&
-                        error.getMessage().equals("El stock debe ser un número mayor o igual a cero")
+                        error.getMessage().equals(ErrorMessages.PRODUCT_STOCK_INVALID)
                 )
                 .verify();
 
@@ -130,7 +131,7 @@ class ProductUseCaseTest {
         StepVerifier.create(productUseCase.addProductToBranch(branchId, product))
                 .expectErrorMatches(error ->
                         error instanceof BusinessException &&
-                        error.getMessage().equals("El stock debe ser un número mayor o igual a cero")
+                        error.getMessage().equals(ErrorMessages.PRODUCT_STOCK_INVALID)
                 )
                 .verify();
 
@@ -165,7 +166,7 @@ class ProductUseCaseTest {
         StepVerifier.create(productUseCase.addProductToBranch(branchId, product))
                 .expectErrorMatches(error ->
                         error instanceof ResourceNotFoundException &&
-                        error.getMessage().equals("No se encontró la sucursal con id: " + branchId)
+                        error.getMessage().equals(String.format(ErrorMessages.BRANCH_NOT_FOUND, branchId))
                 )
                 .verify();
 
@@ -187,7 +188,7 @@ class ProductUseCaseTest {
         StepVerifier.create(productUseCase.addProductToBranch(branchId, product))
                 .expectErrorMatches(error ->
                         error instanceof BusinessException &&
-                        error.getMessage().equals("El producto 'Producto Test' ya existe en esta sucursal")
+                        error.getMessage().equals(String.format(ErrorMessages.PRODUCT_NAME_ALREADY_EXISTS, "Producto Test"))
                 )
                 .verify();
 
@@ -227,7 +228,7 @@ class ProductUseCaseTest {
         StepVerifier.create(productUseCase.updateProduct(1L, updateInfo))
                 .expectErrorMatches(error ->
                         error instanceof BusinessException &&
-                                error.getMessage().equals("El nombre del producto es obligatorio")
+                                error.getMessage().equals(ErrorMessages.PRODUCT_NAME_REQUIRED)
                 )
                 .verify();
 
@@ -245,7 +246,7 @@ class ProductUseCaseTest {
         StepVerifier.create(productUseCase.updateProduct(productId, updateInfo))
                 .expectErrorMatches(error ->
                         error instanceof ResourceNotFoundException &&
-                                error.getMessage().equals("No se encontró el producto con id: " + productId)
+                                error.getMessage().equals(String.format(ErrorMessages.PRODUCT_NOT_FOUND, productId))
                 )
                 .verify();
 
@@ -289,7 +290,7 @@ class ProductUseCaseTest {
         StepVerifier.create(productUseCase.deleteProductFromBranch(branchId, productId))
                 .expectErrorMatches(error ->
                         error instanceof BusinessException &&
-                                error.getMessage().equals("El producto no pertenece a la sucursal indicada")
+                                error.getMessage().equals(ErrorMessages.PRODUCT_DOES_NOT_BELONG_TO_BRANCH)
                 )
                 .verify();
 
@@ -307,7 +308,7 @@ class ProductUseCaseTest {
         StepVerifier.create(productUseCase.deleteProductFromBranch(branchId, productId))
                 .expectErrorMatches(error ->
                         error instanceof ResourceNotFoundException &&
-                                error.getMessage().equals("No se encontró el producto con id: " + productId)
+                                error.getMessage().equals(String.format(ErrorMessages.PRODUCT_NOT_FOUND, productId))
                 )
                 .verify();
 
@@ -348,7 +349,7 @@ class ProductUseCaseTest {
         StepVerifier.create(productUseCase.updateProductStock(branchId, 50L, updateInfo))
                 .expectErrorMatches(error ->
                         error instanceof BusinessException &&
-                                error.getMessage().equals("El stock debe ser un número mayor o igual a cero")
+                                error.getMessage().equals(ErrorMessages.PRODUCT_STOCK_INVALID)
                 )
                 .verify();
 
@@ -365,7 +366,7 @@ class ProductUseCaseTest {
         StepVerifier.create(productUseCase.updateProductStock(branchId, productId, updateInfo))
                 .expectErrorMatches(error ->
                         error instanceof ResourceNotFoundException &&
-                                error.getMessage().equals("Sucursal no encontrada")
+                                error.getMessage().equals(String.format(ErrorMessages.BRANCH_NOT_FOUND, branchId))
                 )
                 .verify();
 
@@ -384,7 +385,7 @@ class ProductUseCaseTest {
         StepVerifier.create(productUseCase.updateProductStock(branchId, productId, updateInfo))
                 .expectErrorMatches(error ->
                         error instanceof ResourceNotFoundException &&
-                                error.getMessage().equals("Producto no encontrado")
+                                error.getMessage().equals(String.format(ErrorMessages.PRODUCT_NOT_FOUND, productId))
                 )
                 .verify();
 
@@ -410,7 +411,7 @@ class ProductUseCaseTest {
         StepVerifier.create(productUseCase.updateProductStock(branchId, productId, updateInfo))
                 .expectErrorMatches(error ->
                         error instanceof BusinessException &&
-                                error.getMessage().equals("El producto no pertenece a la sucursal")
+                                error.getMessage().equals(ErrorMessages.PRODUCT_DOES_NOT_BELONG_TO_BRANCH)
                 )
                 .verify();
 

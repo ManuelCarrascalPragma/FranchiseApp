@@ -24,6 +24,11 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class GlobalErrorHandler extends AbstractErrorWebExceptionHandler {
 
+    private static final String INVALID_ID_FORMAT = "The provided ID must be a valid number";
+    private static final String ROUTE_NOT_FOUND = "The requested route does not exist";
+    private static final String INVALID_INPUT_FORMAT = "Error in input data format";
+    private static final String UNEXPECTED_ERROR = "An unexpected error occurred in the system";
+
     public GlobalErrorHandler(ErrorAttributes errorAttributes, WebProperties webProperties,
                               ApplicationContext applicationContext, ServerCodecConfigurer serverCodecConfigurer) {
         super(errorAttributes, webProperties.getResources(), applicationContext);
@@ -46,21 +51,21 @@ public class GlobalErrorHandler extends AbstractErrorWebExceptionHandler {
             status = HttpStatus.BAD_REQUEST;
             message = error.getMessage();
         } else if (error instanceof ResourceNotFoundException){
-         status = HttpStatus.NOT_FOUND;
-         message = error.getMessage();
+            status = HttpStatus.NOT_FOUND;
+            message = error.getMessage();
         } else if (error instanceof NumberFormatException) {
             status = HttpStatus.BAD_REQUEST;
-            message = "El ID proporcionado debe ser un número válido";
+            message = INVALID_ID_FORMAT;
         } else if (error instanceof NoResourceFoundException) {
-        status = HttpStatus.NOT_FOUND;
-        message = "La ruta solicitada no existe";
+            status = HttpStatus.NOT_FOUND;
+            message = ROUTE_NOT_FOUND;
         } else if (error instanceof ServerWebInputException) {
             status = HttpStatus.BAD_REQUEST;
-            message = "Error en el formato de los datos de entrada";
-        }else {
+            message = INVALID_INPUT_FORMAT;
+        } else {
             status = HttpStatus.INTERNAL_SERVER_ERROR;
-            message = "Ocurrió un error inesperado en el sistema";
-            log.error("Error inesperado en el sistema", error);
+            message = UNEXPECTED_ERROR;
+            log.error("Unexpected system error", error);
         }
 
         return ServerResponse.status(status)
