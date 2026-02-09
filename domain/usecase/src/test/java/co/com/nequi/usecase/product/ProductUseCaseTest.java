@@ -5,6 +5,7 @@ import co.com.nequi.model.branch.gateways.BranchRepository;
 import co.com.nequi.model.exceptions.BusinessException;
 import co.com.nequi.model.exceptions.ResourceNotFoundException;
 import co.com.nequi.model.product.Product;
+import co.com.nequi.model.product.ProductMaxStock;
 import co.com.nequi.model.product.gateways.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -414,5 +416,70 @@ class ProductUseCaseTest {
 
         verify(productRepository).findById(productId);
         verify(productRepository, never()).save(any(Product.class));
+    }
+
+    @Test
+    void getMaxStockProductsByFranchise_Success() {
+        Long franchiseId = 1L;
+
+        Branch b1 = Branch.builder().id(10L).name("Sucursal Norte").build();
+        Branch b2 = Branch.builder().id(20L).name("Sucursal Sur").build();
+
+        Product p1 = Product.builder().name("Producto A").stock(5L).branchId(10L).build();
+        Product p2 = Product.builder().name("Producto B").stock(100L).branchId(10L).build(); // Máximo Norte
+
+        Product p3 = Product.builder().name("Producto C").stock(50L).branchId(20L).build(); // Máximo Sur
+        Product p4 = Product.builder().name("Producto D").stock(10L).branchId(20L).build();
+
+        // Mocks
+        when(branchRepository.findByFranchiseId(franchiseId)).thenReturn(Flux.just(b1, b2));
+        when(productRepository.findByFranchiseId(franchiseId)).thenReturn(Flux.just(p1, p2, p3, p4));
+
+        StepVerifier.create(productUseCase.getMaxStockProductsByFranchise(franchiseId))
+                .recordWith(java.util.ArrayList::new)
+                .expectNextCount(2) // Esperamos 2 resultados (uno por sucursal)
+                .consumeRecordedWith(results -> {
+                    ProductMaxStock resNorte = results.stream()
+                            .filter(r -> r.getBranchName().equals("Sucursal Norte"))
+                            .findFirst().orElseThrow();
+                    assert resNorte.getProductName().equals("Producto B");
+                    assert resNorte.getStock().equals(100L);
+
+                    ProductMaxStock resSur = results.stream()
+                            .filter(r -> r.getBranchName().equals("Sucursal Sur"))
+                            .findFirst().orElseThrow();
+                    assert resSur.getProductName().equals("Producto C");
+                    assert resSur.getStock().equals(50L);
+                })
+                .verifyComplete();
+
+        verify(branchRepository).findByFranchiseId(franchiseId);
+        verify(productRepository).findByFranchiseId(franchiseId);
+    }
+
+    @Test
+    void getMaxStockProductsByFranchise_NoBranches_ShouldReturnEmpty() {
+        Long franchiseId = 1L;
+        when(branchRepository.findByFranchiseId(franchiseId)).thenReturn(Flux.empty());
+
+        StepVerifier.create(productUseCase.getMaxStockProductsByFranchise(franchiseId))
+                .expectNextCount(0)
+                .verifyComplete();
+
+        verify(branchRepository).findByFranchiseId(franchiseId);
+        verify(productRepository, never()).findByFranchiseId(anyLong());
+    }
+
+    @Test
+    void getMaxStockProductsByFranchise_BranchesWithoutProducts_ShouldReturnEmpty() {
+        Long franchiseId = 1L;
+        Branch b1 = Branch.builder().id(10L).name("Sucursal Norte").build();
+
+        when(branchRepository.findByFranchiseId(franchiseId)).thenReturn(Flux.just(b1));
+        when(productRepository.findByFranchiseId(franchiseId)).thenReturn(Flux.empty());
+
+        StepVerifier.create(productUseCase.getMaxStockProductsByFranchise(franchiseId))
+                .expectNextCount(0)
+                .verifyComplete();
     }
 }

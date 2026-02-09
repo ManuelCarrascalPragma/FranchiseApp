@@ -174,6 +174,33 @@ public class RouterRest {
                                     @ApiResponse(responseCode = "404", description = "No encontrado")
                             }
                     )
+            ),
+            @RouterOperation(
+                    path = "/api/franchises/{franchiseId}/max-stock",
+                    method = RequestMethod.GET,
+                    beanClass = ProductHandler.class,
+                    beanMethod = "getMaxStockReport",
+                    operation = @Operation(
+                            operationId = "getMaxStockReport",
+                            summary = "Reporte de productos con mayor stock por sucursal",
+                            description = "Devuelve una lista con el producto que tiene más stock en cada sucursal de una franquicia específica",
+                            parameters = {
+                                    @Parameter(
+                                            name = "franchiseId",
+                                            description = "ID de la franquicia",
+                                            in = ParameterIn.PATH,
+                                            required = true
+                                    )
+                            },
+                            responses = {
+                                    @ApiResponse(
+                                            responseCode = "200",
+                                            description = "Reporte generado exitosamente",
+                                            content = @Content(schema = @Schema(implementation = co.com.nequi.model.product.ProductMaxStock.class))
+                                    ),
+                                    @ApiResponse(responseCode = "404", description = "Franquicia no encontrada")
+                            }
+                    )
             )
     })
 
@@ -185,7 +212,8 @@ public class RouterRest {
                 .andRoute(POST("/api/branches/{id}/products"), productHandler::addProduct)
                 .andRoute(PATCH("/api/products/{id}"), productHandler::updateProduct)
                 .andRoute(DELETE("/api/branches/{branchId}/products/{productId}"), productHandler::deleteProduct)
-                .andRoute(PATCH("/api/branches/{branchId}/products/{productId}/stock"), productHandler::updateStock);
+                .andRoute(PATCH("/api/branches/{branchId}/products/{productId}/stock"), productHandler::updateStock)
+                .andRoute(GET("/api/franchises/{franchiseId}/max-stock"), productHandler::getMaxStockReport);
     }
 
 }

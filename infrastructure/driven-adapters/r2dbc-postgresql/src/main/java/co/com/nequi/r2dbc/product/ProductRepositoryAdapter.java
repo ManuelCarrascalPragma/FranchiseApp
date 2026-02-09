@@ -6,6 +6,7 @@ import co.com.nequi.r2dbc.entities.ProductEntity;
 import co.com.nequi.r2dbc.helper.ReactiveAdapterOperations;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Repository
@@ -24,5 +25,11 @@ public class ProductRepositoryAdapter extends ReactiveAdapterOperations<Product,
     @Override
     public Mono<Void> deleteByIdAndBranchId(Long id, Long branchId) {
         return repository.deleteByIdAndBranchId(id, branchId);
+    }
+
+    @Override
+    public Flux<Product> findByFranchiseId(Long franchiseId) {
+        return repository.findByFranchiseId(franchiseId)
+                .map(this::toEntity);
     }
 }

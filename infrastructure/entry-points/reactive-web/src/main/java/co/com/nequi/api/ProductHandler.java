@@ -1,6 +1,7 @@
 package co.com.nequi.api;
 
 import co.com.nequi.model.product.Product;
+import co.com.nequi.model.product.ProductMaxStock;
 import co.com.nequi.usecase.product.ProductUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -53,5 +54,12 @@ public class ProductHandler {
                             .contentType(MediaType.APPLICATION_JSON)
                             .bodyValue(updatedProduct));
         });
+    }
+
+    public Mono<ServerResponse> getMaxStockReport(ServerRequest request) {
+        Long franchiseId = Long.valueOf(request.pathVariable("franchiseId"));
+        return ServerResponse.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(productUseCase.getMaxStockProductsByFranchise(franchiseId), ProductMaxStock.class);
     }
 }
