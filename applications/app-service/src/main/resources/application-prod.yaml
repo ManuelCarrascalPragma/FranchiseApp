@@ -1,11 +1,12 @@
 server:
   port: 8080
+  shutdown: graceful
+
 spring:
   application:
     name: "FranchiseApp"
-  h2:
-    console:
-      enabled: false
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
   r2dbc:
     initialization-mode: "never"
   sql:
@@ -13,19 +14,22 @@ spring:
       mode: "always"
       platform: "postgres"
       schema-locations: "classpath:schema.sql"
+
 springdoc:
   api-docs:
     path: "/v3/api-docs"
   swagger-ui:
     path: "/swagger-ui.html"
+
 adapters:
   r2dbc:
-    host: "localhost"
-    port: 5433
-    database: "franchise_db"
-    schema: "franchise_management"
-    username: "user"
-    password: "password"
+    host: ${DB_HOST:localhost}
+    port: ${DB_PORT:5432}
+    database: ${DB_NAME:franchise_db}
+    schema: ${DB_SCHEMA:franchise_management}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD}
+
 management:
   endpoints:
     web:
@@ -46,5 +50,6 @@ management:
     export:
       prometheus:
         enabled: true
+
 cors:
-  allowed-origins: "http://localhost:4200,http://localhost:8080"
+  allowed-origins: ${CORS_ORIGINS:http://localhost:4200}

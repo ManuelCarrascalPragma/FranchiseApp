@@ -1,47 +1,128 @@
-# Proyecto Base Implementando Clean Architecture
+# Franchise Management System - Clean Architecture
 
-## Antes de Iniciar
+Sistema de gestión de franquicias implementado con Clean Architecture, Spring Boot WebFlux y desplegado en AWS.
 
-Empezaremos por explicar los diferentes componentes del proyectos y partiremos de los componentes externos, continuando con los componentes core de negocio (dominio) y por último el inicio y configuración de la aplicación.
+## 🏗️ Arquitectura
 
-Lee el artículo [Clean Architecture — Aislando los detalles](https://medium.com/bancolombia-tech/clean-architecture-aislando-los-detalles-4f9530f35d7a)
+Este proyecto implementa Clean Architecture con las siguientes capas:
 
-# Arquitectura
+- **Domain** - Entidades y reglas de negocio
+- **Use Cases** - Lógica de aplicación
+- **Infrastructure** - Adaptadores externos (DB, API REST)
+- **Application** - Configuración y punto de entrada
 
-![Clean Architecture](https://miro.medium.com/max/1400/1*ZdlHz8B0-qu9Y-QO3AXR_w.png)
+### Estructura del Proyecto
 
-## Domain
+```
+├── domain/
+│   ├── model/          # Entidades de dominio
+│   └── usecase/        # Casos de uso
+├── infrastructure/
+│   ├── driven-adapters/    # Adaptadores de salida (DB, APIs)
+│   └── entry-points/       # Adaptadores de entrada (REST)
+└── applications/
+    └── app-service/    # Configuración y bootstrap
+```
 
-Es el módulo más interno de la arquitectura, pertenece a la capa del dominio y encapsula la lógica y reglas del negocio mediante modelos y entidades del dominio.
+## 🚀 Despliegue en AWS
 
-## Usecases
+**URL de producción:** http://franchise-app-alb-1415245703.us-east-1.elb.amazonaws.com
 
-Este módulo gradle perteneciente a la capa del dominio, implementa los casos de uso del sistema, define lógica de aplicación y reacciona a las invocaciones desde el módulo de entry points, orquestando los flujos hacia el módulo de entities.
+### Infraestructura
+- **ECS Fargate** - Contenedores serverless
+- **Application Load Balancer** - Distribución de tráfico
+- **RDS PostgreSQL 15** - Base de datos
+- **ECR** - Registro de imágenes Docker
+- **CloudWatch** - Logs y monitoreo
+- **Secrets Manager** - Gestión de credenciales
 
-## Infrastructure
+### Despliegue Rápido
+```bash
+cd terraform
+./deploy.sh
+```
 
-### Helpers
+### Verificación
+```bash
+./verify-deployment.sh
+```
 
-En el apartado de helpers tendremos utilidades generales para los Driven Adapters y Entry Points.
+## 🏃 Ejecución Local
 
-Estas utilidades no están arraigadas a objetos concretos, se realiza el uso de generics para modelar comportamientos
-genéricos de los diferentes objetos de persistencia que puedan existir, este tipo de implementaciones se realizan
-basadas en el patrón de diseño [Unit of Work y Repository](https://medium.com/@krzychukosobudzki/repository-design-pattern-bc490b256006)
+```bash
+docker-compose up -d
+./gradlew bootRun
+```
 
-Estas clases no puede existir solas y debe heredarse su compartimiento en los **Driven Adapters**
+**URLs locales:**
+- API: http://localhost:8080
+- Swagger UI: http://localhost:8080/swagger-ui.html
+- Health: http://localhost:8080/actuator/health
 
-### Driven Adapters
+## 📡 API Endpoints
 
-Los driven adapter representan implementaciones externas a nuestro sistema, como lo son conexiones a servicios rest,
-soap, bases de datos, lectura de archivos planos, y en concreto cualquier origen y fuente de datos con la que debamos
-interactuar.
+### Franchises
+- `POST /api/franchises` - Crear franquicia
+- `PATCH /api/franchises/{id}` - Actualizar franquicia
 
-### Entry Points
+### Branches
+- `POST /api/franchises/{franchiseId}/branches` - Agregar sucursal
+- `PATCH /api/branches/{branchId}` - Actualizar sucursal
 
-Los entry points representan los puntos de entrada de la aplicación o el inicio de los flujos de negocio.
+### Products
+- `POST /api/branches/{branchId}/products` - Agregar producto
+- `PATCH /api/products/{productId}` - Actualizar nombre de producto
+- `PATCH /api/branches/{branchId}/products/{productId}/stock` - Actualizar stock
+- `DELETE /api/branches/{branchId}/products/{productId}` - Eliminar producto
 
-## Application
+### Reports
+- `GET /api/franchises/{franchiseId}/max-stock` - Producto con mayor stock por sucursal
 
-Este módulo es el más externo de la arquitectura, es el encargado de ensamblar los distintos módulos, resolver las dependencias y crear los beans de los casos de use (UseCases) de forma automática, inyectando en éstos instancias concretas de las dependencias declaradas. Además inicia la aplicación (es el único módulo del proyecto donde encontraremos la función “public static void main(String[] args)”.
+## 🧪 Testing
 
-**Los beans de los casos de uso se disponibilizan automaticamente gracias a un '@ComponentScan' ubicado en esta capa.**
+```bash
+# Ejecutar tests
+./gradlew test
+
+# Verificar despliegue en AWS
+./verify-deployment.sh
+```
+
+## 🛠️ Stack Tecnológico
+
+- **Java 21 LTS**
+- **Spring Boot 3.x** (WebFlux)
+- **R2DBC** (PostgreSQL)
+- **Gradle**
+- **Docker**
+- **Terraform**
+- **AWS** (ECS, RDS, ALB, ECR)
+
+## 📚 Documentación Adicional
+
+- [Terraform README](terraform/README.md) - Documentación de infraestructura
+- [Clean Architecture](https://medium.com/bancolombia-tech/clean-architecture-aislando-los-detalles-4f9530f35d7a) - Artículo de referencia
+
+## 🔧 Configuración
+
+### Variables de Entorno (Producción)
+```bash
+SPRING_PROFILES_ACTIVE=prod
+DB_HOST=<rds-endpoint>
+DB_PORT=5432
+DB_NAME=franchise_db
+DB_USERNAME=postgres
+DB_PASSWORD=<from-secrets-manager>
+```
+
+### Base de Datos
+- **Host:** franchise-app-db.c21k2q0sytbz.us-east-1.rds.amazonaws.com
+- **Port:** 5432
+- **Database:** franchise_db
+- **Schema:** franchise_management
+
+## 📝 Notas
+
+- El schema SQL se ejecuta automáticamente al iniciar la aplicación
+- Los health checks están configurados en `/actuator/health`
+- La aplicación usa graceful shutdown para despliegues sin downtime
