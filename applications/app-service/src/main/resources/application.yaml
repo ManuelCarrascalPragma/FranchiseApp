@@ -3,6 +3,8 @@ server:
 spring:
   application:
     name: "FranchiseApp"
+  profiles:
+    include: resilience
   h2:
     console:
       enabled: false
